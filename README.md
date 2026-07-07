@@ -73,6 +73,24 @@ Through this project, I learned:
 * Visualization of quantum experiment results
 * Differences between classical pseudo-randomness and quantum randomness
 
+## ⚖️ Classical Randomness vs Quantum Randomness
+
+| Classical Randomness              | Quantum Randomness                    |
+| --------------------------------- | ------------------------------------- |
+| Generated using algorithms        | Generated using quantum superposition |
+| Pseudo-random                     | Truly random                          |
+| Deterministic with a seed         | Intrinsically probabilistic           |
+| Reproducible if the seed is known | Cannot be exactly reproduced          |
+| Based on mathematical formulas    | Based on quantum measurement          |
+
+### 🔑 Key Takeaways
+
+* Classical random numbers are generated using deterministic algorithms.
+* Quantum random numbers are generated through quantum superposition and measurement.
+* Classical randomness can be predicted if the seed is known, while quantum randomness is fundamentally unpredictable.
+* Quantum randomness provides higher security and is widely used in quantum cryptography and secure communication.
+
+
 ## 🌟 Future Improvements
 
 * Implement multi-qubit quantum random number generators
