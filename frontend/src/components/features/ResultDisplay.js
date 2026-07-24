@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, AlertCircle, Download } from 'lucide-react';
 import { getSceneInfo, formatConfidence, formatTime } from '../../utils/helpers';
+import { exportPredictionPDF } from '../../utils/pdfExport';
 import QuantumCircuitVisualizer from './QuantumCircuitVisualizer';
 import BlochSphereGrid from './BlochSphere';
 import './ResultDisplay.css';
 
 const ResultDisplay = ({ result, onReset }) => {
   const sceneInfo = getSceneInfo(result.predicted_class);
+  const exportRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
+  
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportPredictionPDF(result, exportRef.current);
+    } catch (e) {
+      console.error('PDF export failed', e);
+      alert(`Export failed: ${e.message}`);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="result-display" data-testid="result-display">
@@ -29,7 +44,20 @@ const ResultDisplay = ({ result, onReset }) => {
             <span>New Prediction</span>
           </motion.button>
           <h1 className="result-title">Prediction Results</h1>
+          <motion.button
+            className="export-button"
+            onClick={handleExport}
+            disabled={exporting}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            data-testid="export-pdf-button"
+          >
+            <Download size={18} />
+            <span>{exporting ? 'Generating…' : 'Export PDF'}</span>
+          </motion.button>
         </div>
+
+        <div ref={exportRef} className="export-region">
 
         <div className="result-grid">
           {/* Image Display */}
@@ -208,6 +236,7 @@ const ResultDisplay = ({ result, onReset }) => {
             ))}
           </ul>
         </motion.div>
+        </div> {/* end export-region */}
       </motion.div>
     </div>
   );

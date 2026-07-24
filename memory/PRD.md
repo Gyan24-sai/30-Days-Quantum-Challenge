@@ -59,6 +59,11 @@ Build a world-class, research-grade AI platform for environmental scene classifi
 - [x] **Settings Page** with checkpoint upload UI - drag-drop .pt/.pth file → POST /api/upload-weights → hot-reload engine. Model status card (device, loaded, health) + 5-stage architecture flow diagram
 - [x] Backend: 13/13 pytest cases pass. Frontend: all nav + new pages verified
 
+## Iteration 4 (2026-07-24)
+- [x] **Video Analysis** - `/api/predict/video` extracts frames with OpenCV, runs full inference per frame. New VideoPage has HTML5 video player with class overlay, timeline strip with class-colored segments, scrubber, Recharts line chart, and clickable frame thumbnail carousel
+- [x] Browser tab title changed to "Hybrid Quantum Image Classifier"
+- [x] **PDF Export** (jsPDF + html2canvas) - one-click "Export PDF" button on Result page generates a 4-page research report: (1) visual snapshot of the full result view (image, prediction, probabilities, GradCAM, circuit, Bloch spheres, scene info), (2-3) continuation, (4) structured metadata page with prediction stats, class probabilities table, PauliZ expectation values, Bloch vectors table, and model architecture. Includes header/footer with timestamps and page numbers
+
 ## Prioritized Backlog
 ### P0 (Blocking / Core)
 - None currently
