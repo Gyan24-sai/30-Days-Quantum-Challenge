@@ -158,7 +158,7 @@ const ResultDisplay = ({ result, onReset }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            <h3>Attention Heatmap (GradCAM)</h3>
+            <h3>Attention Heatmap (Placeholder)</h3>
             <div className="gradcam-wrapper">
               <img
                 src={result.gradcam_base64}
