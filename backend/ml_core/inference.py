@@ -302,6 +302,53 @@ class InferenceEngine:
             "total_params": int(np.prod(vqc.weight_shapes["weights"])),
             "gates": gates
         }
+    
+    def get_bloch_vectors(self, image: Image.Image) -> list:
+        """Compute Bloch vectors (X, Y, Z Pauli expectations) per qubit."""
+        import pennylane as qml
+        
+        vqc = self.model.quantum_circuit
+        
+        # Run classical + attention layers to get quantum inputs
+        input_tensor = self.preprocess_image(image)
+        with torch.no_grad():
+            x_c = self.model.feature_extractor(input_tensor)
+            x_attn = self.model.attention_block(x_c)
+        
+        # Get trained VQC weights
+        q_weights = vqc.q_layer.weights.detach()
+        inputs = x_attn[0].detach()
+        
+        # Build diagnostic circuit measuring all three Pauli axes
+        dev = qml.device("default.qubit", wires=vqc.n_qubits)
+        
+        @qml.qnode(dev, interface="torch")
+        def bloch_circuit(inp, wts):
+            vqc._apply_embedding(inp)
+            vqc._apply_ansatz(wts)
+            return (
+                [qml.expval(qml.PauliX(w)) for w in range(vqc.n_qubits)] +
+                [qml.expval(qml.PauliY(w)) for w in range(vqc.n_qubits)] +
+                [qml.expval(qml.PauliZ(w)) for w in range(vqc.n_qubits)]
+            )
+        
+        try:
+            result = bloch_circuit(inputs, q_weights)
+            result_np = torch.stack(result).detach().cpu().numpy()
+            
+            n = vqc.n_qubits
+            return [
+                {
+                    "x": float(result_np[i]),
+                    "y": float(result_np[n + i]),
+                    "z": float(result_np[2 * n + i]),
+                    "purity": float(np.sqrt(result_np[i]**2 + result_np[n+i]**2 + result_np[2*n+i]**2))
+                }
+                for i in range(n)
+            ]
+        except Exception as e:
+            logger.error(f"Bloch vector computation failed: {e}")
+            return []
 
 
 # Global inference engine instance

@@ -103,3 +103,85 @@ def test_clear_history(session):
     r2 = session.get(f"{API}/history", timeout=30)
     assert r2.status_code == 200
     assert r2.json() == []
+
+
+# ---- NEW: Stats endpoint ----
+def test_stats_empty_after_clear(session):
+    # Ensure DB is empty
+    session.delete(f"{API}/history", timeout=30)
+    r = session.get(f"{API}/stats", timeout=30)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["total"] == 0
+    assert d["by_class"] == {"Rain": 0, "Road": 0, "Sky": 0}
+    assert d["latency_histogram"] == []
+    assert d["class_distribution"] == []
+    assert d["confidence_distribution"] == []
+    assert d["recent_timeline"] == []
+
+
+def test_predict_returns_bloch_vectors(session):
+    img = make_image_bytes()
+    files = {"file": ("test.png", img, "image/png")}
+    r = session.post(f"{API}/predict", files=files, timeout=90)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert "bloch_vectors" in d and isinstance(d["bloch_vectors"], list)
+    assert len(d["bloch_vectors"]) == 4
+    for bv in d["bloch_vectors"]:
+        assert set(["x", "y", "z", "purity"]).issubset(bv.keys())
+        for k in ("x", "y", "z"):
+            assert isinstance(bv[k], (int, float))
+            assert -1.001 <= bv[k] <= 1.001
+        assert isinstance(bv["purity"], (int, float))
+    pytest.shared_prediction_id2 = d["id"]
+
+
+def test_stats_populated(session):
+    # After the predict above there is at least 1 doc
+    r = session.get(f"{API}/stats", timeout=30)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["total"] >= 1
+    assert "Rain" in d["by_class"] and "Road" in d["by_class"] and "Sky" in d["by_class"]
+    assert isinstance(d["latency_histogram"], list) and len(d["latency_histogram"]) > 0
+    assert len(d["class_distribution"]) == 3
+    assert len(d["confidence_distribution"]) == 3
+    assert isinstance(d["recent_timeline"], list) and len(d["recent_timeline"]) >= 1
+    assert d["avg_latency_ms"] > 0
+    assert d["min_latency_ms"] > 0
+    assert d["max_latency_ms"] >= d["min_latency_ms"]
+
+
+# ---- NEW: Upload weights endpoint ----
+def test_upload_weights_wrapped_checkpoint(session):
+    """Upload a wrapped checkpoint {'model_state_dict': {...}, 'epoch': N}."""
+    import torch, tempfile
+    ckpt = {"model_state_dict": {"dummy.weight": torch.zeros(3, 3)}, "epoch": 1}
+    with tempfile.NamedTemporaryFile(suffix=".pt", delete=False) as f:
+        torch.save(ckpt, f.name)
+        tmp_path = f.name
+    with open(tmp_path, "rb") as fp:
+        files = {"file": ("wrapped.pt", fp, "application/octet-stream")}
+        r = session.post(f"{API}/upload-weights", files=files, timeout=60)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["success"] is True
+    assert "weights_loaded" in d
+    assert d["size_bytes"] > 0
+
+
+def test_upload_weights_raw_state_dict(session):
+    """Upload a raw state_dict."""
+    import torch, tempfile
+    sd = {"dummy.weight": torch.zeros(2, 2)}
+    with tempfile.NamedTemporaryFile(suffix=".pt", delete=False) as f:
+        torch.save(sd, f.name)
+        tmp_path = f.name
+    with open(tmp_path, "rb") as fp:
+        files = {"file": ("raw.pt", fp, "application/octet-stream")}
+        r = session.post(f"{API}/upload-weights", files=files, timeout=60)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["success"] is True
+    assert d["size_bytes"] > 0

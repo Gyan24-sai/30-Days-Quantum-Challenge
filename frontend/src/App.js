@@ -12,6 +12,8 @@ import UploadPage from './pages/UploadPage';
 import CameraPage from './pages/CameraPage';
 import VideoPage from './pages/VideoPage';
 import HistoryPage from './pages/HistoryPage';
+import StatsPage from './pages/StatsPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [activeView, setActiveView] = useState('home');
@@ -26,8 +28,12 @@ function App() {
         return <CameraPage />;
       case 'video':
         return <VideoPage />;
+      case 'stats':
+        return <StatsPage />;
       case 'history':
         return <HistoryPage />;
+      case 'settings':
+        return <SettingsPage />;
       default:
         return <HomePage setActiveView={setActiveView} />;
     }

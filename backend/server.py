@@ -48,6 +48,7 @@ class PredictionResult(BaseModel):
     gradcam_base64: Optional[str] = None
     quantum_state: Optional[List[float]] = None
     classical_features: Optional[List[float]] = None
+    bloch_vectors: Optional[List[dict]] = None
     weights_loaded: Optional[bool] = None
 
 
@@ -84,6 +85,101 @@ async def health_check():
         }
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+
+@api_router.get("/stats")
+async def get_stats():
+    """Get aggregated statistics from all predictions in history."""
+    try:
+        predictions = await db.predictions.find(
+            {},
+            {"_id": 0, "image_base64": 0, "gradcam_base64": 0, "quantum_state": 0, "classical_features": 0, "bloch_vectors": 0}
+        ).to_list(10000)
+        
+        if not predictions:
+            return {
+                "total": 0,
+                "by_class": {"Rain": 0, "Road": 0, "Sky": 0},
+                "avg_confidence": {"Rain": 0.0, "Road": 0.0, "Sky": 0.0},
+                "avg_latency_ms": 0.0,
+                "latency_histogram": [],
+                "class_distribution": [],
+                "confidence_distribution": [],
+                "recent_timeline": []
+            }
+        
+        from collections import defaultdict
+        import numpy as np
+        
+        counts = defaultdict(int)
+        conf_sums = defaultdict(float)
+        confidences_by_class = defaultdict(list)
+        latencies = []
+        
+        for p in predictions:
+            cls = p['predicted_class']
+            counts[cls] += 1
+            conf_sums[cls] += p['confidence']
+            confidences_by_class[cls].append(p['confidence'])
+            latencies.append(p['inference_time_ms'])
+        
+        total = len(predictions)
+        avg_conf = {
+            cls: (conf_sums[cls] / counts[cls]) if counts[cls] else 0.0
+            for cls in ['Rain', 'Road', 'Sky']
+        }
+        by_class = {cls: counts.get(cls, 0) for cls in ['Rain', 'Road', 'Sky']}
+        
+        # Latency histogram
+        if latencies:
+            hist_counts, edges = np.histogram(latencies, bins=8)
+            latency_hist = [
+                {"bin": f"{edges[i]:.0f}", "range": f"{edges[i]:.0f}-{edges[i+1]:.0f}ms", "count": int(hist_counts[i])}
+                for i in range(len(hist_counts))
+            ]
+        else:
+            latency_hist = []
+        
+        # Class distribution for pie chart
+        class_dist = [
+            {"name": cls, "value": counts.get(cls, 0)}
+            for cls in ['Rain', 'Road', 'Sky']
+        ]
+        
+        # Confidence distribution (avg per class) for bar chart
+        conf_dist = [
+            {"class": cls, "avg_confidence": round(avg_conf[cls] * 100, 2)}
+            for cls in ['Rain', 'Road', 'Sky']
+        ]
+        
+        # Recent timeline (last 30 predictions)
+        recent = sorted(predictions, key=lambda x: x['timestamp'])[-30:]
+        recent_timeline = [
+            {
+                "index": i,
+                "predicted_class": p['predicted_class'],
+                "confidence": round(p['confidence'] * 100, 2),
+                "latency": round(p['inference_time_ms'], 1)
+            }
+            for i, p in enumerate(recent)
+        ]
+        
+        return {
+            "total": total,
+            "by_class": by_class,
+            "avg_confidence": avg_conf,
+            "avg_latency_ms": float(np.mean(latencies)) if latencies else 0.0,
+            "min_latency_ms": float(np.min(latencies)) if latencies else 0.0,
+            "max_latency_ms": float(np.max(latencies)) if latencies else 0.0,
+            "latency_histogram": latency_hist,
+            "class_distribution": class_dist,
+            "confidence_distribution": conf_dist,
+            "recent_timeline": recent_timeline
+        }
+        
+    except Exception as e:
+        logger.error(f"Stats aggregation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.get("/circuit-info")
@@ -146,6 +242,9 @@ async def predict_image(file: UploadFile = File(...)):
         # Generate GradCAM
         gradcam = inference_engine.generate_gradcam(image, result['predicted_class_idx'])
         
+        # Compute Bloch vectors for each qubit
+        bloch_vectors = inference_engine.get_bloch_vectors(image)
+        
         # Convert image to base64 for response
         buffer = io.BytesIO()
         image.save(buffer, format='PNG')
@@ -161,6 +260,7 @@ async def predict_image(file: UploadFile = File(...)):
             gradcam_base64=gradcam,
             quantum_state=result.get('quantum_state', []),
             classical_features=result.get('classical_features', []),
+            bloch_vectors=bloch_vectors,
             weights_loaded=result.get('weights_loaded', False)
         )
         

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Upload, Camera, Video, History, Settings } from 'lucide-react';
+import { Home, Upload, Camera, Video, History, BarChart2, Settings as SettingsIcon } from 'lucide-react';
 import './Sidebar.css';
 
 const Sidebar = ({ activeView, setActiveView }) => {
@@ -11,7 +11,9 @@ const Sidebar = ({ activeView, setActiveView }) => {
     { id: 'upload', label: 'Upload Image', icon: Upload },
     { id: 'camera', label: 'Live Camera', icon: Camera },
     { id: 'video', label: 'Video Analysis', icon: Video },
+    { id: 'stats', label: 'Analytics', icon: BarChart2 },
     { id: 'history', label: 'History', icon: History },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   return (

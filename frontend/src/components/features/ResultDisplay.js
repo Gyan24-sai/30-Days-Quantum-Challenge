@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { getSceneInfo, formatConfidence, formatTime } from '../../utils/helpers';
 import QuantumCircuitVisualizer from './QuantumCircuitVisualizer';
+import BlochSphereGrid from './BlochSphere';
 import './ResultDisplay.css';
 
 const ResultDisplay = ({ result, onReset }) => {
@@ -179,6 +180,9 @@ const ResultDisplay = ({ result, onReset }) => {
           quantumState={result.quantum_state}
           weightsLoaded={result.weights_loaded}
         />
+        
+        {/* Bloch Sphere Grid */}
+        <BlochSphereGrid blochVectors={result.bloch_vectors} />
 
         {/* Scene Information */}
         <motion.div
