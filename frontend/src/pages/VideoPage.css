@@ -1,0 +1,49 @@
+.video-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px;
+}
+
+.coming-soon-container {
+  max-width: 600px;
+  padding: 80px 60px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.icon-wrapper {
+  color: #00D4FF;
+  opacity: 0.8;
+}
+
+.coming-soon-container h1 {
+  font-size: 36px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff, #00D4FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.coming-soon-container p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.construction-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: rgba(255, 140, 66, 0.1);
+  border: 1px solid rgba(255, 140, 66, 0.3);
+  border-radius: 50px;
+  color: #FF8C42;
+  font-weight: 600;
+  margin-top: 16px;
+}
