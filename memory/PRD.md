@@ -53,6 +53,12 @@ Build a world-class, research-grade AI platform for environmental scene classifi
 - [x] **Robust Weights Loading** - handles both raw state_dict and wrapped checkpoint (with 'model_state_dict' key from trainer); `/api/upload-weights` endpoint for uploading trained .pt file
 - [x] Weights notice on result page directs user to drop checkpoint at `/app/backend/assets/checkpoints/best_model.pt` when running with random init
 
+## Iteration 3 (2026-07-24)
+- [x] **Bloch Sphere Visualizer** - SVG-based 3D-projected Bloch sphere per qubit showing live X/Y/Z Pauli expectation values, state vector arrow, coordinates, and purity bar. Diagnostic PennyLane QNode runs the trained circuit with PauliX/PauliY/PauliZ observables
+- [x] **Analytics Dashboard** (`/api/stats` + StatsPage) - Recharts-based research view: summary cards (total, avg/min/max latency), predicted class distribution pie, avg confidence bar, latency histogram, recent confidence timeline. Aggregates from live MongoDB predictions
+- [x] **Settings Page** with checkpoint upload UI - drag-drop .pt/.pth file → POST /api/upload-weights → hot-reload engine. Model status card (device, loaded, health) + 5-stage architecture flow diagram
+- [x] Backend: 13/13 pytest cases pass. Frontend: all nav + new pages verified
+
 ## Prioritized Backlog
 ### P0 (Blocking / Core)
 - None currently
