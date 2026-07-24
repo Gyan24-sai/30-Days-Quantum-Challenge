@@ -46,6 +46,9 @@ class PredictionResult(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     image_base64: Optional[str] = None
     gradcam_base64: Optional[str] = None
+    quantum_state: Optional[List[float]] = None
+    classical_features: Optional[List[float]] = None
+    weights_loaded: Optional[bool] = None
 
 
 class PredictionHistory(BaseModel):
@@ -83,6 +86,46 @@ async def health_check():
         return {"status": "unhealthy", "error": str(e)}
 
 
+@api_router.get("/circuit-info")
+async def get_circuit_info():
+    """Get quantum circuit topology for visualization."""
+    global inference_engine
+    try:
+        if inference_engine is None:
+            inference_engine = get_inference_engine()
+        return inference_engine.get_circuit_info()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/upload-weights")
+async def upload_weights(file: UploadFile = File(...)):
+    """Upload trained model checkpoint (.pt file)."""
+    global inference_engine
+    try:
+        # Save uploaded file
+        checkpoint_dir = ROOT_DIR / "assets" / "checkpoints"
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        checkpoint_path = checkpoint_dir / "best_model.pt"
+        
+        contents = await file.read()
+        checkpoint_path.write_bytes(contents)
+        
+        # Reload engine with new weights
+        from ml_core import inference as inf_mod
+        inf_mod._inference_engine = None
+        inference_engine = get_inference_engine()
+        
+        return {
+            "success": True,
+            "message": "Weights uploaded and loaded",
+            "weights_loaded": inference_engine.weights_loaded,
+            "size_bytes": len(contents)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
 @api_router.post("/predict", response_model=PredictionResult)
 async def predict_image(file: UploadFile = File(...)):
     """Predict environmental scene from uploaded image."""
@@ -115,7 +158,10 @@ async def predict_image(file: UploadFile = File(...)):
             probabilities=result['probabilities'],
             inference_time_ms=result['inference_time_ms'],
             image_base64=f"data:image/png;base64,{img_base64}",
-            gradcam_base64=gradcam
+            gradcam_base64=gradcam,
+            quantum_state=result.get('quantum_state', []),
+            classical_features=result.get('classical_features', []),
+            weights_loaded=result.get('weights_loaded', False)
         )
         
         # Save to database

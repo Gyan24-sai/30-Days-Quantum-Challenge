@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { getSceneInfo, formatConfidence, formatTime } from '../../utils/helpers';
+import QuantumCircuitVisualizer from './QuantumCircuitVisualizer';
 import './ResultDisplay.css';
 
 const ResultDisplay = ({ result, onReset }) => {
@@ -158,7 +159,7 @@ const ResultDisplay = ({ result, onReset }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            <h3>Attention Heatmap (Placeholder)</h3>
+            <h3>Attention Heatmap (GradCAM)</h3>
             <div className="gradcam-wrapper">
               <img
                 src={result.gradcam_base64}
@@ -168,10 +169,16 @@ const ResultDisplay = ({ result, onReset }) => {
               />
             </div>
             <p className="gradcam-description">
-              Highlighted regions show where the model focused during prediction
+              Highlighted regions show where the ResNet50 last conv layer focused during prediction
             </p>
           </motion.div>
         )}
+
+        {/* Quantum Circuit Visualizer */}
+        <QuantumCircuitVisualizer
+          quantumState={result.quantum_state}
+          weightsLoaded={result.weights_loaded}
+        />
 
         {/* Scene Information */}
         <motion.div

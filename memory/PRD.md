@@ -40,11 +40,18 @@ Build a world-class, research-grade AI platform for environmental scene classifi
 - [x] Home page with hero, tech badges, feature cards
 - [x] Upload page with drag & drop, preview, prediction
 - [x] Live Camera page with webcam integration
-- [x] Result display with confidence ring, probability bars, GradCAM placeholder, scene info
+- [x] Result display with confidence ring, probability bars, scene info
 - [x] History page with prediction cards
 - [x] Loading animation with quantum atom, orbits, electrons
 - [x] Backend tested: 8/8 pytest cases pass
 - [x] Frontend tested: All flows verified
+
+## Iteration 2 (2026-07-24)
+- [x] **Real GradCAM** on ResNet50 layer4 (forward + backward hooks, gradient-weighted activation maps, upsampled to 512x512, JET colormap overlay)
+- [x] **Quantum Circuit Visualizer** SVG component - shows 4 qubit wires, RY encoding gates, Rot rotation gates, CNOT entanglement ring, PauliZ measurements with LIVE expectation values from every inference
+- [x] `/api/circuit-info` endpoint returns full gate topology
+- [x] **Robust Weights Loading** - handles both raw state_dict and wrapped checkpoint (with 'model_state_dict' key from trainer); `/api/upload-weights` endpoint for uploading trained .pt file
+- [x] Weights notice on result page directs user to drop checkpoint at `/app/backend/assets/checkpoints/best_model.pt` when running with random init
 
 ## Prioritized Backlog
 ### P0 (Blocking / Core)

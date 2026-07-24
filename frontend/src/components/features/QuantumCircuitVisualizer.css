@@ -1,0 +1,125 @@
+.quantum-circuit-card {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.circuit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.circuit-header h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.circuit-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.3px;
+}
+
+.backend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(0, 255, 200, 0.08);
+  border: 1px solid rgba(0, 255, 200, 0.25);
+  border-radius: 999px;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  color: #00FFC8;
+  white-space: nowrap;
+}
+
+.backend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00FFC8;
+  box-shadow: 0 0 8px rgba(0, 255, 200, 0.8);
+  animation: pulse 2s infinite;
+}
+
+.circuit-scroll {
+  overflow-x: auto;
+  padding: 12px 4px 20px;
+  border-radius: 16px;
+  background: rgba(5, 8, 22, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.circuit-svg {
+  width: 100%;
+  min-width: 700px;
+  height: auto;
+  display: block;
+}
+
+.circuit-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: 'Sora', sans-serif;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.weights-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 140, 66, 0.08);
+  border: 1px solid rgba(255, 140, 66, 0.25);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.weights-notice code {
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #00D4FF;
+  font-family: 'Fira Code', monospace;
+}
+
+.notice-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF8C42;
+  box-shadow: 0 0 10px rgba(255, 140, 66, 0.7);
+  margin-top: 6px;
+  animation: pulse 2s infinite;
+}
