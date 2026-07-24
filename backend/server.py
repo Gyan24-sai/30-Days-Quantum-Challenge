@@ -297,6 +297,111 @@ async def predict_frame(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.post("/predict/video")
+async def predict_video(file: UploadFile = File(...), max_frames: int = 30):
+    """Analyze video frame-by-frame. Extracts up to max_frames uniformly spaced frames."""
+    global inference_engine
+    import cv2
+    import tempfile
+    
+    try:
+        if inference_engine is None:
+            inference_engine = get_inference_engine()
+        
+        # Save uploaded video to temp file (OpenCV needs a path)
+        contents = await file.read()
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+        
+        try:
+            cap = cv2.VideoCapture(tmp_path)
+            if not cap.isOpened():
+                raise HTTPException(status_code=400, detail="Could not open video file")
+            
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            fps = cap.get(cv2.CAP_PROP_FPS) or 30
+            duration_sec = total_frames / fps if fps else 0
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            
+            # Choose frame indices uniformly
+            n_samples = min(max_frames, total_frames) if total_frames > 0 else max_frames
+            if n_samples <= 0:
+                raise HTTPException(status_code=400, detail="Video has no readable frames")
+            
+            if total_frames > 0:
+                sample_indices = [int(i * total_frames / n_samples) for i in range(n_samples)]
+            else:
+                sample_indices = list(range(n_samples))
+            
+            predictions_per_frame = []
+            
+            for idx, frame_idx in enumerate(sample_indices):
+                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+                ret, frame = cap.read()
+                if not ret:
+                    continue
+                
+                # Convert BGR to RGB and to PIL
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(frame_rgb)
+                
+                # Predict
+                result = inference_engine.predict(pil_img)
+                
+                # Encode a small thumbnail
+                thumb = pil_img.copy()
+                thumb.thumbnail((160, 160))
+                buf = io.BytesIO()
+                thumb.save(buf, format='JPEG', quality=70)
+                thumb_b64 = base64.b64encode(buf.getvalue()).decode()
+                
+                predictions_per_frame.append({
+                    "index": idx,
+                    "frame_number": frame_idx,
+                    "timestamp_sec": round(frame_idx / fps, 3) if fps else 0,
+                    "predicted_class": result['predicted_class'],
+                    "confidence": result['confidence'],
+                    "probabilities": result['probabilities'],
+                    "inference_time_ms": result['inference_time_ms'],
+                    "thumbnail": f"data:image/jpeg;base64,{thumb_b64}"
+                })
+            
+            cap.release()
+            
+            # Compute summary
+            from collections import Counter
+            class_counts = Counter(f['predicted_class'] for f in predictions_per_frame)
+            dominant = class_counts.most_common(1)[0][0] if class_counts else None
+            avg_conf = sum(f['confidence'] for f in predictions_per_frame) / len(predictions_per_frame) if predictions_per_frame else 0
+            
+            return {
+                "video_info": {
+                    "total_frames": total_frames,
+                    "fps": round(fps, 2),
+                    "duration_sec": round(duration_sec, 2),
+                    "width": width,
+                    "height": height,
+                    "frames_analyzed": len(predictions_per_frame)
+                },
+                "summary": {
+                    "dominant_class": dominant,
+                    "class_counts": dict(class_counts),
+                    "avg_confidence": avg_conf
+                },
+                "frames": predictions_per_frame
+            }
+        finally:
+            os.remove(tmp_path)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Video prediction error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/history", response_model=List[PredictionHistory])
 async def get_prediction_history(limit: int = 50):
     """Get prediction history."""
