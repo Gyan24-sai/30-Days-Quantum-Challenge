@@ -79,8 +79,15 @@ const VideoPage = () => {
   const togglePlay = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch((err) => {
+            setError(`Video playback failed: ${err.message || 'codec not supported by browser'}`);
+            setIsPlaying(false);
+          });
+      }
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
