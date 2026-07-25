@@ -1,0 +1,93 @@
+🌦️ Hybrid Quantum Image Classifier
+A Hybrid Quantum-Classical Deep Learning system that classifies outdoor scenes into Road, Sky, and Rain using Transfer Learning and Variational Quantum Circuits (VQC).
+
+📌 Overview
+Hybrid Quantum Image Classifier is a research-inspired project that combines Deep Learning with Quantum Machine Learning. A pretrained ResNet50 extracts image features which are processed by a Variational Quantum Circuit (VQC) for final classification. The web application allows users to upload outdoor images and receive predictions with confidence scores.
+
+
+✨ Features
+• Hybrid Quantum-Classical Architecture
+• Transfer Learning using ResNet50
+• Variational Quantum Circuit (VQC)
+• Real-time Image Classification
+• Modern Responsive UI
+• Prediction Confidence
+• Drag & Drop Upload
+• Research-Oriented Implementation
+
+
+🧠 Problem Statement
+Traditional image classifiers rely on classical neural networks. This project explores integrating quantum circuits with deep learning to investigate hybrid approaches for computer vision.
+🎯 Objectives
+• Build a Hybrid Quantum AI model
+• Integrate Deep Learning with Quantum Computing
+• Classify Road, Sky, and Rain scenes
+• Develop an interactive web application
+• Demonstrate Quantum AI applications
+
+
+🏗️ System Architecture
+Input Image → Image Preprocessing → ResNet50 Feature Extraction → Feature Reduction → Variational Quantum Circuit (PennyLane) → Quantum Measurement → Fully Connected Layer → Final Prediction
+⚙️ Tech Stack
+Python, PennyLane, PyTorch, ResNet50, Flask, HTML, CSS, JavaScript, OpenCV, Pillow, NumPy, Matplotlib
+🧬 Model Pipeline
+Upload Image → Resize & Normalize → ResNet50 Feature Extraction → Feature Compression → Quantum State Encoding → VQC Processing → Quantum Measurement → Prediction Layer → Final Classification
+
+
+📂 Project Structure
+train.py
+predict.py
+quantum_model.py
+classical_model.py
+static/
+templates/
+models/
+dataset/
+requirements.txt
+README.md
+
+
+🚀 Installation
+git clone <repository>
+cd Hybrid-Quantum-Image-Classifier
+pip install -r requirements.txt
+python app.py
+Open: http://127.0.0.1:5000
+📸 Usage
+1. Open the application
+2. Upload an image
+3. Click Predict
+4. View prediction and confidence score
+
+
+📊 Dataset
+Classes: Rain, Sky, Road
+
+
+🧪 Quantum Computing Concepts
+Qubits, Angle Embedding, Quantum State Encoding, Variational Quantum Circuits, Quantum Gates, Entanglement, Expectation Measurement, Hybrid Quantum Neural Networks
+
+
+📈 Future Improvements
+Multi-class classification, IBM Quantum integration, Live camera prediction, Explainable AI (Grad-CAM), Larger dataset, Cloud deployment
+
+
+📚 Research Motivation
+The project demonstrates a Hybrid Quantum Neural Network that combines transfer learning with quantum computing to explore emerging Quantum AI techniques.
+
+
+🤝 Contributing
+Fork the repository, create a feature branch, commit changes, push, and open a Pull Request.
+
+
+👨‍💻 Author
+Gyanendra Sai 
+B.Tech Computer Science Engineering
+Chandigarh University
+Quantum Computing | Quantum AI | Machine Learning | Research
+GitHub: https://github.com/Gyan24-sai
+
+⭐ Support
+If you found this project useful, consider giving it a ⭐ on GitHub.
+License
+MIT License
