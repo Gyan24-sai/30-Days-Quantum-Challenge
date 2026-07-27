@@ -15,7 +15,6 @@ Hybrid Quantum Image Classifier is a research-inspired project that combines Dee
 • Drag & Drop Upload
 • Research-Oriented Implementation
 
-
 🧠 Problem Statement
 Traditional image classifiers rely on classical neural networks. This project explores integrating quantum circuits with deep learning to investigate hybrid approaches for computer vision.
 🎯 Objectives
