@@ -52,7 +52,7 @@ git clone <repository>
 cd Hybrid-Quantum-Image-Classifier
 pip install -r requirements.txt
 python app.py
-Open: http://127.0.0.1:5000
+Open: https://hybridquantumimageclassifer.figma.site/
 📸 Usage
 1. Open the application
 2. Upload an image
